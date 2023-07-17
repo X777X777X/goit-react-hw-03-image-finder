@@ -7,21 +7,31 @@ import Searchbar from './Searchbar/Searchbar';
 import Notiflix from 'notiflix';
 import Loader from './Loader/Loader';
 
+
 let page = 1;
 
 class App extends Component {
   state = {
     inputData: '',
     items: [],
-
+    page: 1,
     status: 'idle',
     totalHits: 0,
   };
 
+
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      this.state.page !== prevState.page ||
+      this.inputData !== prevState.inputData
+    ) {
+      fetchImages();
+    }
+  }
+
   handleSubmit = async inputData => {
-    page = 1;
     if (inputData.trim() === '') {
-      Notiflix.Notify.info('You cannot search by empty field, try again.');
+      Notiflix.Notify.failure('You cannot search by empty field, try again.');
       return;
     } else {
       try {
@@ -29,7 +39,7 @@ class App extends Component {
         const { totalHits, hits } = await fetchImages(inputData, page);
         if (hits.length < 1) {
           this.setState({ status: 'idle' });
-          Notiflix.Notify.failure(
+          Notiflix.Notify.warning(
             'Sorry, there are no images matching your search query. Please try again.'
           );
         } else {
@@ -45,19 +55,26 @@ class App extends Component {
       }
     }
   };
+
+
   onNextPage = async () => {
+    const { inputData, page } = this.state;
     this.setState({ status: 'pending' });
 
     try {
-      const { hits } = await fetchImages(this.state.inputData, (page += 1));
+      const { totalHits, hits } = await fetchImages(inputData, page + 1);
       this.setState(prevState => ({
         items: [...prevState.items, ...hits],
         status: 'resolved',
+        page: page + 1,
+        loadMore: page + 1 < Math.ceil(totalHits / 12),
       }));
     } catch (error) {
       this.setState({ status: 'rejected' });
     }
   };
+
+
   render() {
     const { totalHits, status, items } = this.state;
     if (status === 'idle') {

@@ -9,17 +9,17 @@ class Searchbar extends Component {
     inputData: '',
   };
   onChangeInput = e => {
-    this.setState({ inputData: e.currentTarget.value.toLowerCase() });
+    this.setState({ inputData: e.currentTarget.value.toLowerCase().trim() });
   };
 
   handleSubmit = e => {
-    e.preventDefault();
-    this.props.onSubmit(this.state.inputData);
-    this.setState({ inputData: '' });
+   e.preventDefault();
+   this.props.onSubmit(this.state.inputData);
+   this.setState({ inputData: '' });
   };
 
   render() {
-    const { inputData } = this.state.inputData;
+    const { inputData } = this.state;
     return (
       <header className="Searchbar">
         <form className="SearchForm" onSubmit={this.handleSubmit}>
